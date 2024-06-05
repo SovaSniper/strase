@@ -2,13 +2,21 @@ import { PaymentElement } from "@stripe/react-stripe-js";
 import { useState } from "react";
 import { useStripe, useElements } from "@stripe/react-stripe-js";
 import { Button } from "../ui/button";
-import { getWalletClient } from "@/lib/sdk/utils/client";
 import { SendTransactionModalUIOptions, UnsignedTransactionRequest, usePrivy, useWallets } from "@privy-io/react-auth";
-import { ChainID } from "@/lib/sdk/utils/evm";
-import { PayNownConsumer } from "@/lib/sdk/utils/consumer";
 import { baseSepolia } from "viem/chains";
 import { createWalletClient, custom } from "viem";
-import { getPayNounContractAddress } from "@/lib/sdk";
+
+// import { getWalletClient } from "@/lib/sdk/utils/client";
+// import { ChainID } from "@/lib/sdk/utils/evm";
+// import { PayNownConsumer } from "@/lib/sdk/utils/consumer";
+// import { getPayNounContractAddress } from "@/lib/sdk";
+
+import { getWalletClient } from "@/lib/strase";
+import {
+    ChainID,
+    PayNownConsumer,
+    getPayNounContractAddress
+} from "strase";
 
 export default function CheckoutForm() {
     const { sendTransaction } = usePrivy();
@@ -23,23 +31,23 @@ export default function CheckoutForm() {
     const handleSubmit = async (event: any) => {
         event.preventDefault();
 
-        // if (!stripe || !elements) {
-        //     return;
-        // }
+        if (!stripe || !elements) {
+            return;
+        }
 
-        // setIsProcessing(true);
+        setIsProcessing(true);
 
-        // const { error, paymentIntent } = await stripe.confirmPayment({
-        //     elements,
-        //     redirect: "if_required"
-        // });
+        const { error, paymentIntent } = await stripe.confirmPayment({
+            elements,
+            redirect: "if_required"
+        });
 
-        // if (error) {
-        //     setMessage(error.message || "An unknown error occurred");
-        // }
+        if (error) {
+            setMessage(error.message || "An unknown error occurred");
+        }
 
-        // console.log(paymentIntent);
-        // setClientSecret(paymentIntent?.client_secret || "");
+        console.log(paymentIntent);
+        setClientSecret(paymentIntent?.client_secret || "");
 
         // !IMPORTANT: Pay Noun Integration
         const wallet = await getWalletClient(ChainID.BASE_SEPOLIA, wallets[0]);

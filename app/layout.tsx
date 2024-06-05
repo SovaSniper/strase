@@ -23,7 +23,6 @@ export default function RootLayout({
       <body className={`${aeonik.variable} font-sans`}>
         <Providers>
           <NavBar />
-
           {children}
         </Providers>
       </body>

@@ -1,8 +1,8 @@
 "use client"
 
-import { ParserContract } from "@/lib/sdk";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
+import { ParserContract } from "strase";
+import { Button } from "../../ui/button";
+import { Input } from "../../ui/input";
 import { useState } from "react";
 import { toHex } from "viem";
 
@@ -34,7 +34,10 @@ export const Simulator = ({ }: SimulatorProps) => {
     }
 
 
-    return <div>
+    return <div className="container">
+        <div className="text-2xl font-semibold tracking-tight my-4">
+            Simulate
+        </div>
         <Input type="public Key" placeholder="Enter your input"
             value={publicKey}
             onChange={(e) => setPublicKey(e.target.value)} />

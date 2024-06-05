@@ -5,8 +5,24 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { ConnectWallet } from "../connect-wallet";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface NavBarProps extends React.HTMLAttributes<HTMLDivElement> { }
+
+const navItems = [
+    {
+        title: 'Demo',
+        href: '/demo',
+    },
+    {
+        title: 'Simulate',
+        href: '/utils/simulate',
+    },
+    {
+        title: 'Encrypt',
+        href: '/utils/encrypt',
+    },
+]
 
 export const NavBar = ({ }: NavBarProps) => {
     const router = useRouter();
@@ -36,14 +52,27 @@ export const NavBar = ({ }: NavBarProps) => {
         console.log('user', user);
     }, [ready, authenticated]);
 
-    return <div>
-        {user?.id
-            ? <div>
-                <Button onClick={logout}>Logout</Button>
-                <Button onClick={exportWallet} disabled={!isAuthenticated || !hasEmbeddedWallet}>
-                    Export my wallet
-                </Button>
-            </div> :
-            <ConnectWallet />}
-    </div>
+    return <header className={cn("sticky top-0 z-40 border-b border-transparent group bg-white/20 backdrop-blur is-active border-zinc-950/10")}>
+        <div className="flex h-16 items-center justify-between py-6 container">
+            <div className="flex gap-6 md:gap-10">
+                <div className="text-3xl font-semibold tracking-tight">Strase</div>
+                {navItems.map((item) => (
+                    <div key={item.title} className={cn("flex items-center text-lg font-medium cursor-pointer transition-colors hover:text-foreground/80 sm:text-sm text-foreground/60")}
+                        onClick={() => router.push(item.href)}>
+                        {item.title}
+                    </div>))}
+            </div>
+
+            <div>
+                {user?.id
+                    ? <div>
+                        <Button onClick={logout}>Logout</Button>
+                        <Button onClick={exportWallet} disabled={!isAuthenticated || !hasEmbeddedWallet}>
+                            Export my wallet
+                        </Button>
+                    </div> :
+                    <ConnectWallet />}
+            </div>
+        </div>
+    </header>
 }

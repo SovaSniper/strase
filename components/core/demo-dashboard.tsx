@@ -11,7 +11,7 @@ import {
 import { Input } from '../ui/input';
 import Image from 'next/image';
 import { Payment } from './payment';
-import { Trash } from 'lucide-react';
+import { Divide, Trash } from 'lucide-react';
 import { CartItem, items, useCart } from '@/lib/utils/use-cart';
 
 export const DemoDashboard = () => {
@@ -28,16 +28,23 @@ export const DemoDashboard = () => {
     //     })()
     // }, []);
 
+    const [processingCheckout, setProcessingCheckout] = useState<boolean>(false);
     const handleCheckout = async () => {
-        cart.forEach((item) => {
-            console.log(`Purchasing ${item.quantity} ${item.itemId}`);
-        });
+        try {
+            // cart.forEach((item) => {
+            //     console.log(`Purchasing ${item.quantity} ${item.itemId}`);
+            // });
+            // console.log(`Total: $${total}`);
 
-        console.log(`Total: $${total}`);
-
-        const data = await createPaymentIntent(total);
-        console.log(data);
-        setClientSecret(data.clientSecret);
+            setProcessingCheckout(true);
+            const data = await createPaymentIntent(total);
+            console.log(data);
+            setClientSecret(data.clientSecret);
+        } catch (error) {
+            console.error('Failed to checkout:', error);
+        } finally {
+            setProcessingCheckout(false)
+        }
     }
 
     const createPaymentIntent = async (amount: number) => {
@@ -63,18 +70,19 @@ export const DemoDashboard = () => {
         setClientSecret("");
     }
 
-    return <div className="h-max-[100vh] overflow-y-auto">
+    return <div className="h-max-[100vh] overflow-y-auto mb-32">
         <div className="mx-8">
             <div className="text-2xl font-semibold tracking-tight my-4">
                 Add Items
             </div>
             <div className="flex gap-2 overflow-x-auto mx-8">
-                {items.map((item, index) => <Card key={index}>
+                {items.map((item, index) => <Card key={index} className="!bg-white">
                     <CardHeader className="!w-[256px]">
                         <Image src={item.image} alt="img" width={176} height={176} />
                         <div className="font-semibold leading-none tracking-tight">{item.name}</div>
                         <CardDescription>${item.price}</CardDescription>
-                        <Button onClick={() => addToCart(item.name)} disabled={cart.some(product => product.itemId === item.name)}>Add</Button>
+                        <Button onClick={() => addToCart(item.name)}
+                            disabled={cart.some(product => product.itemId === item.name) || !!clientSecret}>Add</Button>
                     </CardHeader>
                 </Card>)}
             </div>
@@ -89,12 +97,17 @@ export const DemoDashboard = () => {
                     {cart.map((item, index) =>
                         <CheckoutItem key={index} item={item}
                             onRemove={removeFromCart}
-                            onQuantityChange={handleQuantity} />)}
+                            onQuantityChange={handleQuantity}
+                            disabled={!!clientSecret} />)}
                 </div>
                 {cart.length > 0 && !clientSecret &&
-                    <Button onClick={handleCheckout} className="mt-4">
-                        Checkout
-                    </Button>}
+                    <div className="flex items-center justify-between">
+                        <Button onClick={handleCheckout} disabled={processingCheckout} className="mt-4">
+                            {!processingCheckout ? "Checkout" : "Processing..."}
+                        </Button>
+
+                        <div>Total: ${total}</div>
+                    </div>}
             </div>
             <div className="col-span-12 lg:col-span-5 container">
                 <div className="text-2xl font-semibold tracking-tight my-4">
@@ -114,11 +127,13 @@ export const DemoDashboard = () => {
 export const CheckoutItem = ({
     item,
     onRemove,
-    onQuantityChange
+    onQuantityChange,
+    disabled = false
 }: {
     item: CartItem,
     onRemove: Function,
-    onQuantityChange: Function
+    onQuantityChange: Function,
+    disabled?: boolean
 }) => {
     const [product, setProduct] = useState<any>({} as any);
 
@@ -127,7 +142,7 @@ export const CheckoutItem = ({
         setProduct(product);
     }, [item.itemId]);
 
-    return <Card className="border-none shadow-none">
+    return <Card className="border-none shadow-none !bg-white">
         <CardHeader className="p-2">
             <div className="flex justify-between">
                 <div className="flex items-center justify-center space-x-4">
@@ -141,8 +156,10 @@ export const CheckoutItem = ({
                 <div className="flex items-center justify-center">
                     <div>
                         <div className="flex space-x-2">
-                            <Input type="number" value={item.quantity} onChange={() => onQuantityChange(item.itemId)} min={1} max={10} />
-                            <Button onClick={() => onRemove(item.itemId)} variant="link" size="icon" className="w-full text-destructive">
+                            <Input type="number" value={item.quantity} onChange={() => onQuantityChange(item.itemId)}
+                                min={1} max={10} disabled={disabled} />
+                            <Button variant="link" size="icon" className="w-full text-destructive"
+                                disabled={disabled} onClick={() => onRemove(item.itemId)}>
                                 <Trash />
                             </Button>
                         </div>

@@ -40,9 +40,9 @@ export default function CheckoutForm() {
 
     const trySubmit = async () => {
         // Stripe Payment
-        // const paymentIntent = await confirmStripePayment();
-        // const paymentIntentClientSecret = paymentIntent.client_secret || "";
-        const paymentIntentClientSecret = "pi_3POtLQRuZyF18QqG1HWHmG2a_secret_vheLIiSMLxVIZY452YYo2d7qu"
+        const paymentIntent = await confirmStripePayment();
+        const paymentIntentClientSecret = paymentIntent.client_secret || "";
+        // const paymentIntentClientSecret = "pi_3POtLQRuZyF18QqG1HWHmG2a_secret_vheLIiSMLxVIZY452YYo2d7qu"
         setClientSecret(paymentIntentClientSecret);
 
         // Strase Integration with Privy
@@ -58,7 +58,7 @@ export default function CheckoutForm() {
             chainId: parseInt(DEFAULT_NETWORK),
             data: data,
             gasLimit: 2100000,
-            gasPrice: 8000000000,
+            // gasPrice: 8000000000,
             // value: '0x3B9ACA00',
         };
         console.log(requestData);

@@ -41,7 +41,7 @@ export const validStraseWithStripe = async (publishableKey: string, paymentInten
         const payload = await parser.pack(BigInt(0), BigInt(Status.PENDING))
 
         return {
-            payload: payload.toString(),
+            result: payload.toString(),
             clientSecret: paymentIntent,
             expired,
             ...payment
@@ -49,8 +49,10 @@ export const validStraseWithStripe = async (publishableKey: string, paymentInten
     }
 
     const payload = await parser.pack(BigInt(payment.amount), BigInt(Status.PENDING))
+
+    console.log("Payment intent is valid", paymentIntentId, Status.CLAIMED)
     return {
-        payload: payload.toString(),
+        result: payload.toString(),
         clientSecret: paymentIntent,
         expired,
         ...payment

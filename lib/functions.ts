@@ -1,21 +1,15 @@
 import Stripe from "stripe";
-import { NextRequest, NextResponse } from "next/server";
 import { ParserContract } from "strase";
-import { fromHex } from "viem";
 
-export async function POST(request: NextRequest) {
-    const body = await request.json()
-    const publishableKey: string = fromHex(body.publishableKey || "0x" as `0x${string}`, "string")
-    const paymentIntent: string = fromHex(body.paymentIntent || "0x" as `0x${string}`, "string")
-
+export const validStraseWithStripe = async (publishableKey: string, paymentIntent: string, testnet: boolean = false) => {
     // console.log(publishableKey, paymentIntent)
-    if (!publishableKey.startsWith("pk_test_") || !isPaymentIntentValid(paymentIntent))
-        return NextResponse.json({ message: "Invalid information" }, { status: 400 })
+    if (!publishableKey.startsWith(testnet ? "pk_test_" : "pk_") || !isPaymentIntentValid(paymentIntent))
+        throw new Error("Invalid information")
 
     const stripe = new Stripe(publishableKey);
 
     if (!stripe)
-        return NextResponse.json({ message: "Failed to load stripe" }, { status: 500 })
+        throw new Error("Failed to load stripe")
 
     const paymentIntentId = paymentIntent.split('_secret_')[0];
     const payment = await stripe.paymentIntents.retrieve(paymentIntentId, {
@@ -34,33 +28,33 @@ export async function POST(request: NextRequest) {
         console.log("Payment intent has expired", paymentIntentId, Status.EXPIRED)
         const payload = await parser.pack(BigInt(0), BigInt(Status.EXPIRED))
         console.log("Payload:", payload.toString())
-        return NextResponse.json({
+        return {
             payload: payload.toString(),
             clientSecret: paymentIntent,
             expired,
             ...payment
-        })
+        }
     }
 
     if (!valid) {
         console.log("Payment intent is pending or voided", paymentIntentId, Status.PENDING)
         const payload = await parser.pack(BigInt(0), BigInt(Status.PENDING))
 
-        return NextResponse.json({
+        return {
             payload: payload.toString(),
             clientSecret: paymentIntent,
             expired,
             ...payment
-        })
+        }
     }
 
     const payload = await parser.pack(BigInt(payment.amount), BigInt(Status.PENDING))
-    return NextResponse.json({
+    return {
         payload: payload.toString(),
         clientSecret: paymentIntent,
         expired,
         ...payment
-    })
+    }
 }
 
 enum Status {

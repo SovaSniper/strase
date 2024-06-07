@@ -3,19 +3,16 @@ import { useState } from "react";
 import { useStripe, useElements } from "@stripe/react-stripe-js";
 import { Button } from "../ui/button";
 import { SendTransactionModalUIOptions, UnsignedTransactionRequest, usePrivy, useWallets } from "@privy-io/react-auth";
-import { baseSepolia } from "viem/chains";
-import { createWalletClient, custom } from "viem";
 
 // import { getWalletClient } from "@/lib/sdk/utils/client";
 // import { ChainID } from "@/lib/sdk/utils/evm";
 // import { PayNownConsumer } from "@/lib/sdk/utils/consumer";
 // import { getPayNounContractAddress } from "@/lib/sdk";
 
-import { getWalletClient } from "@/lib/strase";
+import { DEFAULT_NETWORK, getWalletClient } from "@/lib/strase";
 import {
-    ChainID,
-    PayNownConsumer,
-    getPayNounContractAddress
+    FunctionConsumer,
+    getConsumerAddress
 } from "strase";
 
 export default function CheckoutForm() {
@@ -29,13 +26,68 @@ export default function CheckoutForm() {
     const [clientSecret, setClientSecret] = useState("");
 
     const handleSubmit = async (event: any) => {
-        event.preventDefault();
-
-        if (!stripe || !elements) {
-            return;
+        try {
+            event.preventDefault();
+            setIsProcessing(true);
+            await trySubmit();
+        } catch (error: any) {
+            setMessage(error.message || "An unknown error occurred");
+            console.error(error);
+        } finally {
+            setIsProcessing(false);
         }
+    }
 
-        setIsProcessing(true);
+    const trySubmit = async () => {
+        // Stripe Payment
+        // const paymentIntent = await confirmStripePayment();
+        // const paymentIntentClientSecret = paymentIntent.client_secret || "";
+        const paymentIntentClientSecret = "pi_3POtLQRuZyF18QqG1HWHmG2a_secret_vheLIiSMLxVIZY452YYo2d7qu"
+        setClientSecret(paymentIntentClientSecret);
+
+        // Strase Integration with Privy
+        const publishableKey = await getPublishableKey();
+        const wallet: any = await getWalletClient(DEFAULT_NETWORK, wallets[0]);
+        const consumer = new FunctionConsumer(DEFAULT_NETWORK, wallet);
+        const data = consumer.sendRequestEncode(publishableKey, paymentIntentClientSecret);
+        console.log(data)
+
+        // Privy transaction
+        const requestData: UnsignedTransactionRequest = {
+            to: getConsumerAddress(DEFAULT_NETWORK),
+            chainId: parseInt(DEFAULT_NETWORK),
+            data: data,
+            gasLimit: 2100000,
+            gasPrice: 8000000000,
+            // value: '0x3B9ACA00',
+        };
+        console.log(requestData);
+
+        const uiConfig: SendTransactionModalUIOptions = {
+            header: 'Strase Earn Reward',
+            description: 'Congratulations! You have successfully paid for the product. Now, you can earn reward by clicking the button below.',
+            buttonText: 'Earn Reward',
+            // transactionInfo: {
+            //     contractInfo: {
+            //         name: "Strase",
+            //         url: "https://strase-nine.vercel.app/",
+            //     }
+            // }
+        };
+        const txReceipt = await sendTransaction(requestData, uiConfig);
+        console.log(txReceipt);
+
+        // const provider = await wallets[0].getEthereumProvider();
+        // const transactionHash = await provider.request({
+        //     method: 'eth_sendTransaction',
+        //     params: [requestData],
+        // });
+    };
+
+    const confirmStripePayment = async () => {
+        if (!stripe || !elements) {
+            throw new Error("Stripe.js has not loaded yet. Make sure to disable the submit button until Stripe.js has loaded.");
+        }
 
         const { error, paymentIntent } = await stripe.confirmPayment({
             elements,
@@ -43,43 +95,23 @@ export default function CheckoutForm() {
         });
 
         if (error) {
-            setMessage(error.message || "An unknown error occurred");
+            throw new Error(error.message || "An unknown error occurred");
         }
 
-        console.log(paymentIntent);
-        setClientSecret(paymentIntent?.client_secret || "");
+        return paymentIntent;
+    }
 
-        // !IMPORTANT: Pay Noun Integration
-        const wallet = await getWalletClient(ChainID.BASE_SEPOLIA, wallets[0]);
+    const getPublishableKey = async () => {
+        const response = await fetch("/api/config", {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
 
-        const consumer = new PayNownConsumer(ChainID.BASE_SEPOLIA, wallet);
-        // const reciept = await consumer.sendRequest("wallet", "testing");
-        // console.log(reciept);
-
-        const data = consumer.sendRequestData("wallet", "testing");
-        const requestData: UnsignedTransactionRequest = {
-            to: getPayNounContractAddress(true),
-            chainId: parseInt(ChainID.BASE_SEPOLIA),
-            // data: data,
-            // value: '0x3B9ACA00',
-        };
-
-        const uiConfig: SendTransactionModalUIOptions = {
-            header: 'Pay Noun Earn Reward',
-            description: 'Congratulations! You have successfully paid for the product. Now, you can earn reward by clicking the button below.',
-            buttonText: 'Earn Reward',
-            transactionInfo: {
-                contractInfo: {
-                    name: "Pay Noun",
-                    url: "https://paynoun.com",
-                }
-            }
-        };
-        const txReceipt = await sendTransaction(requestData, uiConfig);
-        console.log(txReceipt);
-
-        setIsProcessing(false);
-    };
+        const data = await response.json();
+        return data.publishableKey || "";
+    }
 
     return (
         <form id="payment-form" onSubmit={handleSubmit}>

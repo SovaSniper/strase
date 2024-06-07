@@ -1,9 +1,16 @@
-import { createWalletClient, custom } from "viem";
+import { createPublicClient, createWalletClient, custom, http } from "viem";
 import { ConnectedWallet } from "@privy-io/react-auth";
 import { base, baseSepolia } from "viem/chains";
-import { ChainID } from "strase";
+import { ChainID, getRPC } from "strase";
 
 export const DEFAULT_NETWORK = ChainID.BASE_SEPOLIA;
+
+export const getClient = (chain: string = DEFAULT_NETWORK) => {
+    const rpcUrl = getRPC(chain)
+    return createPublicClient({
+        transport: http(rpcUrl),
+    })
+}
 
 export const getWalletClient = async (chain: string = DEFAULT_NETWORK, wallet: ConnectedWallet) => {
     let viemChain: any = baseSepolia;

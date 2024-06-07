@@ -6,6 +6,8 @@ import { useEffect } from "react";
 import { ConnectWallet } from "../connect-wallet";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { Identicon } from "./identicon";
+import { Profile } from "./profile";
 
 interface NavBarProps extends React.HTMLAttributes<HTMLDivElement> { }
 
@@ -15,12 +17,8 @@ const navItems = [
         href: '/demo',
     },
     {
-        title: 'Simulate',
-        href: '/utils/simulate',
-    },
-    {
-        title: 'Encrypt',
-        href: '/utils/encrypt',
+        title: 'Redeem',
+        href: '/redeem',
     },
 ]
 
@@ -65,13 +63,8 @@ export const NavBar = ({ }: NavBarProps) => {
 
             <div>
                 {user?.id
-                    ? <div>
-                        <Button onClick={logout}>Logout</Button>
-                        <Button onClick={exportWallet} disabled={!isAuthenticated || !hasEmbeddedWallet}>
-                            Export my wallet
-                        </Button>
-                    </div> :
-                    <ConnectWallet />}
+                    ? <Profile />
+                    : <ConnectWallet />}
             </div>
         </div>
     </header>

@@ -29,7 +29,7 @@ export const validStraseWithStripe = async (publishableKey: string, paymentInten
         const payload = await parser.pack(BigInt(0), BigInt(Status.EXPIRED))
         console.log("Payload:", payload.toString())
         return {
-            payload: payload.toString(),
+            result: payload.toString(),
             clientSecret: paymentIntent,
             expired,
             ...payment

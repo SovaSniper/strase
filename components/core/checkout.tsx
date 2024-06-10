@@ -1,25 +1,15 @@
 import { PaymentElement } from "@stripe/react-stripe-js";
 import { useState } from "react";
 import { useStripe, useElements } from "@stripe/react-stripe-js";
-import { Button } from "../ui/button";
-import { SendTransactionModalUIOptions, UnsignedTransactionRequest, usePrivy, useWallets } from "@privy-io/react-auth";
+import { Button } from "@/components/ui/button";
 
-// import { getWalletClient } from "@/lib/sdk/utils/client";
-// import { ChainID } from "@/lib/sdk/utils/evm";
-// import { PayNownConsumer } from "@/lib/sdk/utils/consumer";
-// import { getPayNounContractAddress } from "@/lib/sdk";
+interface CheckoutFormProps extends React.HTMLAttributes<HTMLDivElement> {
+    handleStraseIntegration: Function
+}
 
-import { DEFAULT_NETWORK, getWalletClient } from "@/lib/strase";
-import {
-    FunctionConsumer,
-    getConsumerAddress
-} from "strase";
-
-export default function CheckoutForm() {
-    const { sendTransaction } = usePrivy();
+export const CheckoutForm = ({ handleStraseIntegration }: CheckoutFormProps) => {
     const stripe = useStripe();
     const elements = useElements();
-    const { wallets } = useWallets();
 
     const [message, setMessage] = useState("");
     const [isProcessing, setIsProcessing] = useState(false);
@@ -40,48 +30,25 @@ export default function CheckoutForm() {
 
     const trySubmit = async () => {
         // Stripe Payment
-        const paymentIntent = await confirmStripePayment();
-        const paymentIntentClientSecret = paymentIntent.client_secret || "";
-        // const paymentIntentClientSecret = "pi_3POtLQRuZyF18QqG1HWHmG2a_secret_vheLIiSMLxVIZY452YYo2d7qu"
-        setClientSecret(paymentIntentClientSecret);
+        let paymentIntentClientSecret = ""
+        try {
+            const paymentIntent = await confirmStripePayment();
+            paymentIntentClientSecret = paymentIntent.client_secret || "";
+            setMessage("Payment successful");
+        }
+        catch (error: any) {
+            throw new Error(error.message || "An unknown error occurred");
+        }
 
-        // Strase Integration with Privy
-        const publishableKey = await getPublishableKey();
-        const wallet: any = await getWalletClient(DEFAULT_NETWORK, wallets[0]);
-        const consumer = new FunctionConsumer(DEFAULT_NETWORK, wallet);
-        const data = consumer.sendRequestEncode(publishableKey, paymentIntentClientSecret);
-        console.log(data)
+        try {
+            // const paymentIntentClientSecret = "pi_3PPJeRRuZyF18QqG1ug0ej6d_secret_Apc79NO6EKL76H4FvgJQvYPa5"
+            setClientSecret(paymentIntentClientSecret);
 
-        // Privy transaction
-        const requestData: UnsignedTransactionRequest = {
-            to: getConsumerAddress(DEFAULT_NETWORK),
-            chainId: parseInt(DEFAULT_NETWORK),
-            data: data,
-            gasLimit: 2100000,
-            // gasPrice: 8000000000,
-            // value: '0x3B9ACA00',
-        };
-        console.log(requestData);
-
-        const uiConfig: SendTransactionModalUIOptions = {
-            header: 'Strase Earn Reward',
-            description: 'Congratulations! You have successfully paid for the product. Now, you can earn reward by clicking the button below.',
-            buttonText: 'Earn Reward',
-            // transactionInfo: {
-            //     contractInfo: {
-            //         name: "Strase",
-            //         url: "https://strase-nine.vercel.app/",
-            //     }
-            // }
-        };
-        const txReceipt = await sendTransaction(requestData, uiConfig);
-        console.log(txReceipt);
-
-        // const provider = await wallets[0].getEthereumProvider();
-        // const transactionHash = await provider.request({
-        //     method: 'eth_sendTransaction',
-        //     params: [requestData],
-        // });
+            // Strase Integration
+            await handleStraseIntegration(paymentIntentClientSecret);
+        } catch (error: any) {
+            console.error(error);
+        }
     };
 
     const confirmStripePayment = async () => {
@@ -99,18 +66,6 @@ export default function CheckoutForm() {
         }
 
         return paymentIntent;
-    }
-
-    const getPublishableKey = async () => {
-        const response = await fetch("/api/config", {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
-
-        const data = await response.json();
-        return data.publishableKey || "";
     }
 
     return (

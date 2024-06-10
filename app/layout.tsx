@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
 import { Providers } from "@/components/providers";
-import { NavBar } from "@/components/core/nav/navbar";
 import { aeonik } from "@/lib/fonts";
-import { cn } from "@/lib/utils";
+import { ConnectorBanner } from "@/components/core/homepage/connect-banner";
+import { RenderNavBar } from "@/components/core/nav/render-nav";
+
+import "./globals.css";
+import '@coinbase/onchainkit/styles.css';
 
 // const inter = Inter({ subsets: ["latin"] });
 
@@ -22,7 +23,8 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${aeonik.variable} font-sans`}>
         <Providers>
-          <NavBar />
+          <ConnectorBanner />
+          <RenderNavBar />
           {children}
         </Providers>
       </body>

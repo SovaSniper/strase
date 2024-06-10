@@ -1,5 +1,9 @@
 import Stripe from "stripe";
 import { ParserContract } from "strase";
+import { getFiatPrice, getSupportedCurrency } from "./price-feed";
+import { getPriceFeedClient } from "./strase";
+import { getContract } from "viem";
+import { abi } from "./utils/price-feed-abi";
 
 export const validStraseWithStripe = async (publishableKey: string, paymentIntent: string, testnet: boolean = false) => {
     // console.log(publishableKey, paymentIntent)
@@ -16,13 +20,37 @@ export const validStraseWithStripe = async (publishableKey: string, paymentInten
         client_secret: paymentIntent
     });
 
+    // Main conversion to SB will be in USD dollars, hence any other currency, will be based of rated conversion
+    let value: number = Math.round(payment.amount / 100);
+    if (payment.currency !== "usd") {
+        const priceFeed = await getFiatPrice(payment.currency)
+        if (!priceFeed?.contractAddress) {
+            throw new Error("Currency not supported")
+        }
+
+        const client = getPriceFeedClient();
+        const contract = getContract({ address: priceFeed?.contractAddress, abi, client, })
+        const conversion: bigint = await contract.read.latestAnswer() as bigint;
+
+        // Given the conversion rate, convert the amount to USD
+        const currencies = await getSupportedCurrency();
+        const curr = currencies.find((c) => c.value.toLocaleLowerCase() === payment.currency.toLocaleLowerCase());
+
+        // Transfer to dollar version of the currency, as stripe currently are smallest unit
+        let amount = payment.amount;
+        if (curr && curr.decimal) {
+            amount = payment.amount / (10 ** curr.decimal);
+        }
+        value = convertCurrencyToUSD(amount, conversion, priceFeed.decimals);
+        console.log("Converted value to USD:", payment.currency, value)
+    }
     const expired = isExpired(payment.created)
     const valid = isValid(payment.status)
     const parser = new ParserContract();
 
     console.log("expired:", expired)
     console.log("valid:", valid)
-    console.log("paymentIntent:", payment.amount)
+    console.log("paymentIntent:", payment.amount, value)
 
     if (expired) {
         console.log("Payment intent has expired", paymentIntentId, Status.EXPIRED)
@@ -48,7 +76,9 @@ export const validStraseWithStripe = async (publishableKey: string, paymentInten
         }
     }
 
-    const payload = await parser.pack(BigInt(payment.amount), BigInt(Status.PENDING))
+    const payload = await parser.pack(
+        BigInt(value), // BigInt(payment.amount), 
+        BigInt(Status.PENDING))
 
     console.log("Payment intent is valid", paymentIntentId, Status.CLAIMED)
     return {
@@ -76,3 +106,14 @@ const isExpired = (ts: number): boolean => {
 }
 
 const isValid = (status: string): boolean => status.toLocaleLowerCase() === "succeeded"
+
+// This should be non cent format
+export function convertCurrencyToUSD(amount: number, exchangeRate: bigint, decimals: number): number {
+    const exchangeRateFloat = Number(exchangeRate) / Math.pow(10, decimals);
+    return Math.round(amount * exchangeRateFloat); // Round to the nearest dollar
+}
+
+export function convertUSDToCurrency(amount: number, exchangeRate: bigint, decimals: number): number {
+    const exchangeRateFloat = Number(exchangeRate) / Math.pow(10, decimals);
+    return Math.round(amount / exchangeRateFloat); // Round to the nearest dollar
+}

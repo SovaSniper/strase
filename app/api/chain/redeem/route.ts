@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import nodemailer from 'nodemailer';
+import { fromHex } from "viem";
 
 export async function POST(request: NextRequest) {
     const body = await request.json()
 
-    const email = body.email || "";
+    const email: string = fromHex(body.email || "", "string")
     if (!isValidEmail(email)) {
-        return NextResponse.json({ message: "Invalid email" }, { status: 400 });
+        return NextResponse.json({ result: RedeemStatus.INVALID_EMAIL, }, { status: 400 })
     }
 
     const transporter = nodemailer.createTransport({
@@ -39,10 +40,16 @@ export async function POST(request: NextRequest) {
         await transporter.sendMail(mailOptions);
     } catch (error) {
         console.error(error);
-        return NextResponse.json({ message: "Error mailing reward" }, { status: 400 });
+        return NextResponse.json({ result: RedeemStatus.ERROR, }, { status: 400 })
     }
 
-    return NextResponse.json({ status: true, })
+    return NextResponse.json({ result: RedeemStatus.SUCCESS, })
+}
+
+enum RedeemStatus {
+    SUCCESS = "1",
+    INVALID_EMAIL = "2",
+    ERROR = "3",
 }
 
 const isValidEmail = (email: string): boolean => {

@@ -14,10 +14,10 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Identicon } from "./identicon";
-import { Copy, FileKey, Keyboard, LogOut, User } from "lucide-react";
+import { Copy, FileKey, LogOut, User } from "lucide-react";
 import { DEFAULT_NETWORK, getClient } from "@/lib/strase";
 import { PublicClient, formatEther } from "viem";
-import { ChainID, StraseBuck } from "strase";
+import { StraseBuck } from "strase";
 
 interface ProfileProps extends React.HTMLAttributes<HTMLImageElement> {
 }
@@ -48,15 +48,15 @@ export const Profile = ({ ...props }: ProfileProps) => {
 
         (async () => {
             const client = await getClient()
-            setClient(client)
-
             const balance = await client.getBalance({
                 address: user?.wallet?.address as `0x${string}`,
             })
             console.log('balance', balance)
             setNativeBalance(balance)
 
-            const token = new StraseBuck(DEFAULT_NETWORK, {} as any);
+            const token = new StraseBuck({
+                chain: DEFAULT_NETWORK,
+            });
 
             const bucks = await token.balanceOf(user?.wallet?.address || "")
             console.log('bucks', bucks)
@@ -68,7 +68,7 @@ export const Profile = ({ ...props }: ProfileProps) => {
         <DropdownMenuTrigger>
             <div className="flex items-center space-x-4">
                 <span className="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full">
-                    {hasEmbeddedWallet && user?.wallet &&
+                    {user?.wallet &&
                         <Identicon address={user.wallet?.address as `0x${string}`} />}
                 </span>
                 <div>
@@ -93,11 +93,6 @@ export const Profile = ({ ...props }: ProfileProps) => {
                 <DropdownMenuItem onClick={exportWallet} disabled={!isAuthenticated || !hasEmbeddedWallet}>
                     <FileKey className="mr-2 h-4 w-4" />
                     <span>Export Wallet</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                    <Keyboard className="mr-2 h-4 w-4" />
-                    <span>Keyboard shortcuts</span>
-                    <DropdownMenuShortcut>⌘K</DropdownMenuShortcut>
                 </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

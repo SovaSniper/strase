@@ -1,5 +1,5 @@
 import { usePrivy } from "@privy-io/react-auth";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 
 export const ConnectWallet = () => {
     const { ready, authenticated, login } = usePrivy();

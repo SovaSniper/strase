@@ -1,13 +1,14 @@
 import { Elements } from "@stripe/react-stripe-js";
 import { useEffect, useState } from "react";
-import CheckoutForm from "./checkout";
+import { CheckoutForm } from "./checkout";
 import { loadStripe } from "@stripe/stripe-js";
 
 interface PaymentProps extends React.HTMLAttributes<HTMLDivElement> {
     clientSecret: string;
+    handleStraseIntegration: Function;
 }
 
-export const Payment = ({ clientSecret }: PaymentProps) => {
+export const Payment = ({ clientSecret, handleStraseIntegration }: PaymentProps) => {
     const [stripePromise, setStripePromise] = useState<any>(null);
 
     useEffect(() => {
@@ -28,6 +29,6 @@ export const Payment = ({ clientSecret }: PaymentProps) => {
 
     return <Elements stripe={stripePromise} options={{ clientSecret }}>
         {/* {clientSecret && clientSecret} */}
-        <CheckoutForm />
+        <CheckoutForm handleStraseIntegration={handleStraseIntegration} />
     </Elements>
 }

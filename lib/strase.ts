@@ -5,6 +5,12 @@ import { ChainID, getRPC } from "strase";
 
 export const DEFAULT_NETWORK = ChainID.BASE_SEPOLIA;
 
+export const getPriceFeedClient = () => {
+    return createPublicClient({
+        transport: http("https://polygon-rpc.com/"),
+    })
+}
+
 export const getClient = (chain: string = DEFAULT_NETWORK) => {
     const rpcUrl = getRPC(chain)
     return createPublicClient({
@@ -24,4 +30,12 @@ export const getWalletClient = async (chain: string = DEFAULT_NETWORK, wallet: C
         chain: viemChain,
         transport: custom(provider),
     });
+}
+
+export interface StraseStore {
+    id: string;
+    name: string;
+    image: string;
+    amount: string;
+    contract: string;
 }

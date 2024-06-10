@@ -1,89 +1,60 @@
+import { DEFAULT_NETWORK, StraseStore } from "@/lib/strase";
 import { NextRequest, NextResponse } from "next/server";
+import { ChainID, GiftRedeemables, StoreGiftCards, StoreToken } from "strase";
+import { formatEther } from "viem";
 
 export async function GET(request: NextRequest) {
+    const giftStore = new StoreGiftCards({
+        chain: DEFAULT_NETWORK,
+    })
+
+    const straseStore: StraseStore[] = []
+
+    // const gifts: GiftRedeemables[] = await giftStore.getStore();
+    // const giftAddress = giftStore.contract.address;
+    // straseStore.push(...gifts.filter(i => i.active).map((item) => {
+    //     return {
+    //         id: item.id.toString(),
+    //         name: "Amazon",
+    //         image: "/images/amazon.png",
+    //         amount: item.redeemAmount as bigint,
+    //         contract: giftAddress,
+    //         abi: {
+    //             "inputs": [
+    //                 {
+    //                     "internalType": "string",
+    //                     "name": "email",
+    //                     "type": "string"
+    //                 }
+    //             ],
+    //             "name": "redeem",
+    //         },
+    //     }
+    // }))
+
+    const tokenStore = new StoreToken({
+        chain: DEFAULT_NETWORK,
+    })
+
+    const tokens = await tokenStore.getStore();
+    const tokenAddress = tokenStore.contract.address;
+    straseStore.push(...tokens.filter(i => i.active).map((item) => {
+        const normalValue = parseInt(formatEther(item.redeemAmount))
+        
+        return {
+            id: item.id.toString(),
+            name: `$${normalValue/100} USDC`,
+            image: "/images/usdc.jpeg",
+            amount: item.redeemAmount.toString(),
+            contract: tokenAddress,
+            abi: {
+                "inputs": [],
+                "name": "redeem",
+            },
+        }
+    }))
+
     return NextResponse.json({
-        results: [
-            {
-                name: "USDC",
-                image: "/images/usdc.jpeg",
-                amount: 10,
-                contract: "0xddaAd340b0f1Ef65169Ae5E41A8b10776a75482d",
-                abi: {
-                    "inputs": [
-                        {
-                            "internalType": "uint256",
-                            "name": "amount",
-                            "type": "uint256"
-                        }
-                    ],
-                    "name": "redeem",
-                    "outputs": [],
-                    "stateMutability": "nonpayable",
-                    "type": "function"
-                },
-            },
-            {
-                name: "USDC",
-                image: "/images/usdc.jpeg",
-                amount: 50,
-                contract: "0xddaAd340b0f1Ef65169Ae5E41A8b10776a75482d",
-                abi: {
-                    "inputs": [
-                        {
-                            "internalType": "uint256",
-                            "name": "amount",
-                            "type": "uint256"
-                        }
-                    ],
-                    "name": "redeem",
-                    "outputs": [],
-                    "stateMutability": "nonpayable",
-                    "type": "function"
-                },
-            },
-            {
-                name: "Amazon Gift Card",
-                image: "/images/amazon.png",
-                amount: 50,
-                contract: "0xddaAd340b0f1Ef65169Ae5E41A8b10776a75482d",
-                abi: {
-                    "inputs": [
-                        {
-                            "internalType": "uint256",
-                            "name": "amount",
-                            "type": "uint256"
-                        }
-                    ],
-                    "name": "redeem",
-                    "outputs": [],
-                    "stateMutability": "nonpayable",
-                    "type": "function"
-                },
-            },
-            {
-                name: "Apple Gift Card",
-                image: "/images/apple.jpg",
-                amount: 50,
-                contract: "0xddaAd340b0f1Ef65169Ae5E41A8b10776a75482d",
-                abi: {
-                    "inputs": [
-                        {
-                            "internalType": "uint256",
-                            "name": "amount",
-                            "type": "uint256"
-                        },
-                        {
-                            "internalType": "string",
-                            "name": "email",
-                            "type": "string"
-                        }
-                    ],
-                    "name": "redeem",
-                    "outputs": [],
-                    "stateMutability": "nonpayable",
-                    "type": "function"
-                },
-            }
-        ]
+        results: straseStore,
     })
 }

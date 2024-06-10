@@ -11,6 +11,9 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 import { Input } from "../ui/input"
+import { DEFAULT_NETWORK, StraseStore } from "@/lib/strase"
+import { formatEther } from "viem"
+import { getStoreGiftAddress } from "strase"
 
 interface RedeemListProps extends React.HTMLAttributes<HTMLDivElement> {
 }
@@ -21,13 +24,15 @@ export const RedeemList = ({ }: RedeemListProps) => {
     useEffect(() => {
         (async () => {
             const response = await fetch("/api/redeem")
-            const data: { results: any[] } = await response.json()
+            const data: { results: StraseStore[] } = await response.json()
             console.log(data)
             setStore(data.results)
         })()
     }, [])
 
     const handleRedeem = async (item: any) => {
+        if (item.contract === getStoreGiftAddress(DEFAULT_NETWORK)) {
+        }
         console.log("redeem", item.contract, args)
     }
 
@@ -47,7 +52,7 @@ export const RedeemList = ({ }: RedeemListProps) => {
                     <div>
                         <img className="rounded-lg object-cover h-48 w-96" src={item.image} alt="item" />
                         <div className="font-medium text-3xl">{item.name}</div>
-                        <div>{item.amount}</div>
+                        <div>{formatEther(item.amount)}</div>
                         <Dialog onOpenChange={(open) => handleContract(open, item)} key={index}>
                             <DialogTrigger className={buttonVariants({ variant: "default" })}>Open</DialogTrigger>
                             <DialogContent>

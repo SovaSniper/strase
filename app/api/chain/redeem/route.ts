@@ -6,6 +6,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
 
     const email: string = fromHex(body.email || "", "string")
+    console.log(email)
     if (!isValidEmail(email)) {
         return NextResponse.json({ result: RedeemStatus.INVALID_EMAIL, }, { status: 400 })
     }

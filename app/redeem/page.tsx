@@ -1,5 +1,5 @@
-import { RedeemList } from "@/components/core/redeem-list";
+import { RenderRedeemList } from "@/components/core/redeem/render-redeem";
 
 export default async function Page() {
-    return <RedeemList />
+    return <RenderRedeemList />
 }

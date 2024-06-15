@@ -2,6 +2,7 @@ import { PaymentElement } from "@stripe/react-stripe-js";
 import { useState } from "react";
 import { useStripe, useElements } from "@stripe/react-stripe-js";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 interface CheckoutFormProps extends React.HTMLAttributes<HTMLDivElement> {
     handleStraseIntegration: Function
@@ -21,6 +22,7 @@ export const CheckoutForm = ({ handleStraseIntegration }: CheckoutFormProps) => 
             setIsProcessing(true);
             await trySubmit();
         } catch (error: any) {
+            toast.error(error.message || "An unknown error occurred")
             setMessage(error.message || "An unknown error occurred");
             console.error(error);
         } finally {
@@ -32,9 +34,11 @@ export const CheckoutForm = ({ handleStraseIntegration }: CheckoutFormProps) => 
         // Stripe Payment
         let paymentIntentClientSecret = ""
         try {
+            toast("Processing payment ...")
             const paymentIntent = await confirmStripePayment();
             paymentIntentClientSecret = paymentIntent.client_secret || "";
             setMessage("Payment successful");
+            toast("Processing successful ...")
         }
         catch (error: any) {
             throw new Error(error.message || "An unknown error occurred");
@@ -43,11 +47,10 @@ export const CheckoutForm = ({ handleStraseIntegration }: CheckoutFormProps) => 
         try {
             // const paymentIntentClientSecret = "pi_3PPJeRRuZyF18QqG1ug0ej6d_secret_Apc79NO6EKL76H4FvgJQvYPa5"
             setClientSecret(paymentIntentClientSecret);
-
-            // Strase Integration
             await handleStraseIntegration(paymentIntentClientSecret);
         } catch (error: any) {
-            console.error(error);
+            // console.error(error);
+            throw new Error(`Payment for successfully, however failed redeeming Strase Buck. Please try again with ${paymentIntentClientSecret}`);
         }
     };
 

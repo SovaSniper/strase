@@ -10,27 +10,29 @@ export async function GET(request: NextRequest) {
 
     const straseStore: StraseStore[] = []
 
-    // const gifts: GiftRedeemables[] = await giftStore.getStore();
-    // const giftAddress = giftStore.contract.address;
-    // straseStore.push(...gifts.filter(i => i.active).map((item) => {
-    //     return {
-    //         id: item.id.toString(),
-    //         name: "Amazon",
-    //         image: "/images/amazon.png",
-    //         amount: item.redeemAmount as bigint,
-    //         contract: giftAddress,
-    //         abi: {
-    //             "inputs": [
-    //                 {
-    //                     "internalType": "string",
-    //                     "name": "email",
-    //                     "type": "string"
-    //                 }
-    //             ],
-    //             "name": "redeem",
-    //         },
-    //     }
-    // }))
+    const gifts: GiftRedeemables[] = await giftStore.getStore();
+    const giftAddress = giftStore.contract.address;
+    straseStore.push(...gifts.filter(i => i.active).map((item) => {
+        const normalValue = parseInt(formatEther(item.redeemAmount))
+
+        return {
+            id: item.id.toString(),
+            name: `Amazon $${normalValue} Gift Card`,
+            image: "/images/amazon.png",
+            amount: item.redeemAmount.toString(),
+            contract: giftAddress,
+            abi: {
+                "inputs": [
+                    {
+                        "internalType": "string",
+                        "name": "email",
+                        "type": "string"
+                    }
+                ],
+                "name": "redeem",
+            },
+        }
+    }))
 
     const tokenStore = new StoreToken({
         chain: DEFAULT_NETWORK,
@@ -40,10 +42,10 @@ export async function GET(request: NextRequest) {
     const tokenAddress = tokenStore.contract.address;
     straseStore.push(...tokens.filter(i => i.active).map((item) => {
         const normalValue = parseInt(formatEther(item.redeemAmount))
-        
+
         return {
             id: item.id.toString(),
-            name: `$${normalValue/100} USDC`,
+            name: `$${normalValue / 100} USDC`,
             image: "/images/usdc.jpeg",
             amount: item.redeemAmount.toString(),
             contract: tokenAddress,

@@ -16,7 +16,7 @@ export const ConnectorBanner = ({ }: ConnectorBannerProps) => {
         <div>
             Currently using {walletOption === "smart-wallet" ? "Coinbase Smart Wallet" : "Privy"}. Switch to
         </div>
-        <Button onClick={handleSwitch} size="sm" className="py-1 text-base">
+        <Button onClick={handleSwitch} size="sm" className="py-1/4 text-sm">
             {walletOption === "smart-wallet" ? "Privy" : "Smart Wallet"}
         </Button>
     </div>

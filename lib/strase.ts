@@ -1,4 +1,4 @@
-import { createPublicClient, createWalletClient, custom, http } from "viem";
+import { AbiItem, createPublicClient, createWalletClient, custom, http } from "viem";
 import { ConnectedWallet } from "@privy-io/react-auth";
 import { base, baseSepolia } from "viem/chains";
 import { ChainID, getRPC } from "strase";
@@ -37,5 +37,9 @@ export interface StraseStore {
     name: string;
     image: string;
     amount: string;
-    contract: string;
+    contract: `0x${string}`;
+    abi: {
+        inputs: any[];
+        name: string;
+    };
 }

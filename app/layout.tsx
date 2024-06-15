@@ -3,6 +3,7 @@ import { Providers } from "@/components/providers";
 import { aeonik } from "@/lib/fonts";
 import { ConnectorBanner } from "@/components/core/homepage/connect-banner";
 import { RenderNavBar } from "@/components/core/nav/render-nav";
+import { Toaster } from "@/components/ui/sonner"
 
 import "./globals.css";
 import '@coinbase/onchainkit/styles.css';
@@ -26,6 +27,7 @@ export default function RootLayout({
           <ConnectorBanner />
           <RenderNavBar />
           {children}
+          <Toaster richColors={true} />
         </Providers>
       </body>
     </html>

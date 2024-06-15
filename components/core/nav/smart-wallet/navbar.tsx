@@ -60,17 +60,16 @@ export const NavBar = ({ }: NavBarProps) => {
                 }
 
                 return (
-                    <div className="flex h-8 w-8 items-center justify-center">
+                    <div className="flex items-center justify-center">
                         {address && <DropdownMenu>
                             <DropdownMenuTrigger>
-                                <div className="flex items-center space-x-4">
-                                    <span className="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full">
+                                <div className="flex items-center">
+                                    <span className="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full flex items-center">
                                         <Avatar address={address} />
-
                                     </span>
                                     <div>
-                                        <p className="text-sm font-medium leading-none">{formatEther(nativeBalance)} ETH</p>
-                                        <p className="text-sm font-medium leading-none">{formatEther(straseBalance)} SB</p>
+                                        <p className="text-sm font-medium leading-none">{`${(+formatEther(nativeBalance)).toFixed(4)} ETH`}</p>
+                                        <p className="text-sm font-medium leading-none">{`${(+formatEther(straseBalance)).toFixed(4)} SB`}</p>
                                     </div>
                                 </div>
                             </DropdownMenuTrigger>

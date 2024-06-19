@@ -1,6 +1,6 @@
 # Strase Site
 
-This is Stras
+This is Strase Frontend
 
 ## Getting Started
 

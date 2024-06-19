@@ -45,7 +45,6 @@ export const CheckoutForm = ({ handleStraseIntegration }: CheckoutFormProps) => 
         }
 
         try {
-            // const paymentIntentClientSecret = "pi_3PPJeRRuZyF18QqG1ug0ej6d_secret_Apc79NO6EKL76H4FvgJQvYPa5"
             setClientSecret(paymentIntentClientSecret);
             await handleStraseIntegration(paymentIntentClientSecret);
         } catch (error: any) {

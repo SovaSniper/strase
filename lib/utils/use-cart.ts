@@ -98,10 +98,10 @@ export const useCart = () => {
         setCart(cart.filter(product => product.itemId !== itemId));
     }
 
-    const handleQuantity = (itemId: string) => {
+    const handleQuantity = (itemId: string, value: number) => {
         const newCart = cart.map(product => {
             if (product.itemId === itemId) {
-                return { ...product, quantity: product.quantity + 1 };
+                return { ...product, quantity: value };
             }
             return product;
         });

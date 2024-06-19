@@ -2,6 +2,7 @@
 
 import { DEFAULT_NETWORK } from "@/lib/strase";
 import {
+    ChainID,
     FunctionConsumer,
     getConsumerAddress
 } from "strase";
@@ -14,18 +15,14 @@ interface DashboardProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export const Dashboard = ({ }: DashboardProps) => {
     const handleStraseIntegration = async (clientSectret: string) => {
-        // Strase Integration with Privy
+        // Strase Integration with Smart Wallet
         const publishableKey = await getPublishableKey();
-        const consumer = new FunctionConsumer({ chain: DEFAULT_NETWORK, });
+        const consumer = new FunctionConsumer({ 
+            chain: ChainID.BASE_SEPOLIA, });
         const data = consumer.sendRequestEncode(publishableKey, clientSectret);
-        console.log(data)
-
-        console.log('writeContract', config)
         const result = await sendTransaction(config, {
-            to: getConsumerAddress(DEFAULT_NETWORK) as `0x${string}`,
-            // chainId: parseInt(DEFAULT_NETWORK),
+            to: getConsumerAddress(ChainID.BASE_SEPOLIA) as `0x${string}`,
             data: data,
-            // gasLimit: 3_000_000,
         })
 
         console.log(result)

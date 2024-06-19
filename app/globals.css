@@ -92,3 +92,12 @@
 .hero-pattern .content {
   z-index: 2;
 }
+
+body {
+  padding: 0 !important;
+  overflow: auto !important;
+}
+
+nextjs-portal {
+  display: none;
+}

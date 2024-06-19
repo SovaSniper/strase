@@ -223,7 +223,7 @@ export const CheckoutItem = ({
                 <div className="flex items-center justify-center">
                     <div>
                         <div className="flex space-x-2">
-                            <Input type="number" value={item.quantity} onChange={() => onQuantityChange(item.itemId)}
+                            <Input type="number" value={item.quantity} onChange={(e) => onQuantityChange(item.itemId, parseInt(e.target.value))}
                                 min={1} max={10} disabled={disabled} />
                             <Button variant="link" size="icon" className="w-full text-destructive"
                                 disabled={disabled} onClick={() => onRemove(item.itemId)}>

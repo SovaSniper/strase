@@ -7,7 +7,7 @@ export default function Home() {
   return <div className="mb-16">
     <section className="hero-pattern h-screen relative py-32">
       <div className="content relative mx-auto px-4 md:px-6 pb-[72px] text-amazon-900">
-        <Banner href="https://onchain-summer.devfolio.co/" text="🎖️ Participating in Onchain Summer Buildathon" className="mb-6" />
+        <Banner href="https://devfolio.co/projects/strase-37c4" text="🎖️ Participating in Onchain Summer Buildathon" className="mb-6" />
         <h1 className="max-w-[858px] mx-auto text-center mb-6 text-4xl md:text-6xl font-medium">
           <div>
             Pay with <span className="text-[#635bff]">Stripe</span>
@@ -25,11 +25,13 @@ export default function Home() {
         </p>
         <div className="grid grid-cols-2 max-w-[384px] mx-auto gap-2 md:gap-4">
           <Button className="font-md rounded-full text-base h-12 px-16">
+            <Link href="/demo" target="_self">
             <span className="whitespace-nowrap">Early Testnet Access</span>
+            </Link>
           </Button>
 
           <Button className="font-md rounded-full text-base h-12 px-16" variant="secondary">
-            <Link href="#devexp">
+            <Link href="https://www.npmjs.com/package/strase" target="_blank">
               Integrate with SDK
             </Link>
           </Button>

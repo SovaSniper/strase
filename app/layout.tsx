@@ -11,8 +11,8 @@ import '@coinbase/onchainkit/styles.css';
 // const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "PayNoun",
-  description: "Pay Noun, Earn Now",
+  title: "Strase",
+  description: "Pay with Stripe, Earn with Stripe",
 };
 
 export default function RootLayout({
